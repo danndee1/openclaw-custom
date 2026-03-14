@@ -4,6 +4,7 @@ FROM ${BASE_IMAGE}
 ENV DEBIAN_FRONTEND=noninteractive \
     XDG_CACHE_HOME=/root/.cache \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
     PIP_CACHE_DIR=/root/.cache/pip \
     HF_HOME=/root/.cache/huggingface \
     TRANSFORMERS_CACHE=/root/.cache/huggingface \
@@ -32,8 +33,12 @@ RUN mkdir -p \
     /models
 
 COPY requirements.extra.txt /tmp/requirements.extra.txt
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
-  && if [ -s /tmp/requirements.extra.txt ]; then python3 -m pip install --no-cache-dir -r /tmp/requirements.extra.txt; fi \
+RUN python3 -m pip --version \
+  && python3 -m pip install --no-cache-dir --break-system-packages --upgrade pip setuptools wheel \
+  && if [ -s /tmp/requirements.extra.txt ]; then \
+       sed -n '1,120p' /tmp/requirements.extra.txt; \
+       python3 -m pip install --no-cache-dir --break-system-packages --prefer-binary -r /tmp/requirements.extra.txt; \
+     fi \
   && rm -f /tmp/requirements.extra.txt
 
 ENTRYPOINT ["docker-entrypoint.sh"]
