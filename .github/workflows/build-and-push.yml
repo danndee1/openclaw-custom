@@ -15,6 +15,7 @@ on:
 env:
   UPSTREAM_IMAGE: 1186258278/openclaw-zh:nightly
   IMAGE_NAME: openclaw-custom
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   build:
