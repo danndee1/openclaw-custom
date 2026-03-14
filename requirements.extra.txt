@@ -1,0 +1,7 @@
+# 在这里放你希望固定安装的 Python 依赖
+# 每次 CI 构建镜像都会安装这些包
+
+# 示例:
+# openai
+# requests
+# numpy

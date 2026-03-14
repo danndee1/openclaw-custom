@@ -1,0 +1,35 @@
+services:
+  openclaw:
+    image: ghcr.io/YOUR_GH_USERNAME/openclaw-custom:latest
+    container_name: openclaw
+    restart: unless-stopped
+    ports:
+      - "18789:18789"
+    volumes:
+      - ./data:/root/.openclaw
+      - ./persist/cache:/root/.cache
+      - ./persist/models:/models
+      - ./persist/config:/root/.config
+      - ./persist/local:/root/.local
+      # 如需保留 /tmp 运行时缓存，可放开下一行
+      # - ./persist/tmp:/tmp
+    environment:
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - XDG_CACHE_HOME=/root/.cache
+      - PIP_CACHE_DIR=/root/.cache/pip
+      - HF_HOME=/root/.cache/huggingface
+      - TRANSFORMERS_CACHE=/root/.cache/huggingface
+      - TORCH_HOME=/root/.cache/torch
+      - NPM_CONFIG_PREFIX=/root/.local
+      # 如不需要代理，删除以下三行
+      - HTTP_PROXY=http://172.22.0.1:1890
+      - HTTPS_PROXY=http://172.22.0.1:1890
+      - ALL_PROXY=http://172.22.0.1:1890
+      - NO_PROXY=127.0.0.1,localhost,::1,172.22.0.0/16,openclaw
+    command: openclaw gateway run --allow-unconfigured
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:18789/health', r => process.exit(r.statusCode===200 ? 0 : 1)).on('error', () => process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
